@@ -11,10 +11,10 @@ class FreEncoder():
         self.fns=[]
         fres=[torch.sin,torch.cos]
         self.fns.append(lambda x:x)
-        self.out_dim+=3    
-        for i in range(self.L):
+        self.out_dim+=3
+        for i in torch.range(0,self.L-1):
             for fre in fres:
-                self.fns.append(lambda x:fre(2**i*torch.pi*x))
+                self.fns.append(lambda x,fre=fre,i=i:fre(2.**i*x*torch.pi))
                 self.out_dim+=3
     def __call__(self,inputs:Any) -> Any:
         return torch.cat([fn(inputs) for fn in self.fns],dim=-1)

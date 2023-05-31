@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
-class NeRF(nn.modules):
+class NeRF(nn.Module):
     def __init__(self,pts_ch=3,view_ch=3,D=8,W=256,skips=[4]):
         super(NeRF,self).__init__()
         self.pts_ch=pts_ch
@@ -17,7 +17,7 @@ class NeRF(nn.modules):
         #view_dir part
         self.feature=nn.Linear(self.W,self.W)
         self.out_alpha=nn.Linear(self.W,1)
-        self.view_linear=nn.Linear(self.W,self.W//2)
+        self.view_linear=nn.Linear(self.W+self.view_ch,self.W//2)
         self.out_rgb=nn.Linear(self.W//2,3)
     def forward(self,x):
         pts_x,view_x=torch.split(x,[self.pts_ch,self.view_ch],dim=-1)
@@ -28,9 +28,10 @@ class NeRF(nn.modules):
             if i in self.skips:
                 h=torch.cat([pts_x,h],dim=-1)
         #view
-        h=self.feature(h)
         alpha=self.out_alpha(h)
-        h=torch.cat([h,view_x])
+        h=self.feature(h)
+        h=torch.cat([h,view_x],dim=-1)
+        
         h=self.view_linear(h)
         h=F.relu(h)
         rgb=self.out_rgb(h)
