@@ -36,4 +36,17 @@ class NeRF(nn.Module):
         h=F.relu(h)
         rgb=self.out_rgb(h)
         return torch.cat([rgb,alpha],dim=-1)
-            
+
+def batch_run_model(pts,views,model,chunk):
+    rets=[]
+    for i in range(0,pts.shape[0],chunk):
+        rets.append(model(torch.cat([pts[i:i+chunk],views[i:i+chunk]],dim=-1)))
+    return torch.cat(rets,dim=0)
+def apply_model(input_pts,input_views,pts_embed_fn,view_embed_fn,model,batch_chunk):
+    pts_flat=torch.reshape(input_pts,shape=([-1,input_pts.shape[-1]]))
+    pts_embeded=pts_embed_fn(pts_flat)
+    views_exp=input_views[:,None,:].expand(input_pts.shape)
+    views_flat=torch.reshape(views_exp,shape=([-1,views_exp.shape[-1]]))
+    views_embeded=view_embed_fn(views_flat)
+    outputs=batch_run_model(pts_embeded,views_embeded,model,batch_chunk)
+    return torch.reshape(outputs,shape=(input_pts.shape[:1]+[outputs.shape[-1]]))    
