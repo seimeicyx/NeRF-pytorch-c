@@ -49,4 +49,4 @@ def apply_model(input_pts,input_views,pts_embed_fn,view_embed_fn,model,batch_chu
     views_flat=torch.reshape(views_exp,shape=([-1,views_exp.shape[-1]]))
     views_embeded=view_embed_fn(views_flat)
     outputs=batch_run_model(pts_embeded,views_embeded,model,batch_chunk)
-    return torch.reshape(outputs,shape=(input_pts.shape[:1]+[outputs.shape[-1]]))    
+    return torch.reshape(outputs,shape=(list(input_pts.shape[:-1])+[outputs.shape[-1]]))    

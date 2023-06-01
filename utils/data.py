@@ -5,15 +5,16 @@ from PIL import Image
 import numpy as np
 from typing import Tuple,List
 from dataclasses import dataclass
+from utils.camera import SceneMeta
 @dataclass
-class Loaded_data():
+class Target_img():
     imgs:np.array
     camera_poses:np.array
 def load_imgf32(img_path:str)->np.array:
     img=Image.open(img_path)
     img=np.array(img,dtype=np.float32)
     return img/255.0
-def load_jsondata(json_path:Path)->Tuple[Loaded_data,List]:
+def load_jsondata(json_path:Path)->Tuple[Target_img,SceneMeta]:
     imgs=[]
     camera_poses=[]
     angle_x=0.5
@@ -38,5 +39,6 @@ def load_jsondata(json_path:Path)->Tuple[Loaded_data,List]:
     except BaseException as e:
         logger.error(e)
     finally:
-        load_data=Loaded_data(imgs=imgs,camera_poses=camera_poses)
-        return load_data,K
+        train_targetImg=Target_img(imgs=imgs,camera_poses=camera_poses)
+        scene_train=SceneMeta(H=H,W=W,K=K)
+        return train_targetImg,scene_train
