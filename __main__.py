@@ -3,6 +3,7 @@ from typing import  Union
 from typing_extensions import Annotated
 from utils.args import NeRFTrainingArgs,NeRFTestingArgs
 from pathlib import Path
+import torch
 
 CmdTrain=Annotated[
         NeRFTrainingArgs,
@@ -16,8 +17,9 @@ CmdArgs=Union[CmdTrain,CmdTest]
 
 if __name__=="__main__":
     args=tyro.cli(CmdArgs)
+    _device= torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if isinstance(args,NeRFTrainingArgs):
         from train import train
-        train(args)
+        train(args,_device)
     elif isinstance(args,NeRFTestingArgs):
         pass

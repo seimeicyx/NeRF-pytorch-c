@@ -3,7 +3,9 @@ import torch
 import torch.nn.functional as F
 from utils.args import NeRFTrainingArgs
 from copy import deepcopy
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+from typing import Any
 class NeRF(nn.Module):
     def __init__(self,pts_ch=3,view_ch=3,D=8,W=256,skips=[4]):
         super(NeRF,self).__init__()
@@ -54,7 +56,7 @@ def apply_model(input_pts,input_views,pts_embed_fn,view_embed_fn,model,batch_chu
     outputs=batch_run_model(pts_embeded,views_embeded,model,batch_chunk)
     return torch.reshape(outputs,shape=(list(input_pts.shape[:-1])+[outputs.shape[-1]]))
 
-def create_nerf(args):
+def create_nerf(args:NeRFTrainingArgs,device:Any):
     from models.encoder import FreEncoder
     from models.nerf import NeRF
     pts_embedded=FreEncoder(args.multires)
