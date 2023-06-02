@@ -3,9 +3,7 @@ import torch
 import torch.nn.functional as F
 from utils.args import NeRFTrainingArgs
 from copy import deepcopy
-
-
-from typing import Any
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class NeRF(nn.Module):
     def __init__(self,pts_ch=3,view_ch=3,D=8,W=256,skips=[4]):
         super(NeRF,self).__init__()
@@ -34,12 +32,14 @@ class NeRF(nn.Module):
                 h=torch.cat([pts_x,h],dim=-1)
         #view
         alpha=self.out_alpha(h)
+        alpha=F.relu(alpha)
         h=self.feature(h)
         h=torch.cat([h,view_x],dim=-1)
         
         h=self.view_linear(h)
         h=F.relu(h)
         rgb=self.out_rgb(h)
+        rgb=torch.sigmoid(rgb)
         return torch.cat([rgb,alpha],dim=-1)
 
 def batch_run_model(pts,views,model,chunk):
