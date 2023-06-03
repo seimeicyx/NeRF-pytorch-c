@@ -20,7 +20,10 @@ def sample_traindata(args:NeRFTrainingArgs,train_targetImg_ten: Target_img_tenso
     if iter<args.precrop_iters:
         dH=int((H*args.precrop_frac)//2)
         dW=int((W*args.precrop_frac)//2)
-        coords=torch.stack(torch.meshgrid(torch.arange(H//2-dH,H//2+dH+1),torch.arange(W//2-dW,W//2+dW+1)),dim=-1)
+        coords=torch.stack(torch.meshgrid(
+                            torch.linspace(H//2 - dH, H//2 + dH - 1, 2*dH), 
+                            torch.linspace(W//2 - dW, W//2 + dW - 1, 2*dW)
+                        ), -1)
     else:
         coords=torch.stack(torch.meshgrid(torch.arange(H),torch.arange(W)),dim=-1)
     coords=torch.reshape(coords,[-1,2])
