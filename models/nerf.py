@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 from utils.args import NeRFTrainingArgs
 from copy import deepcopy
+from typing import Any
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class NeRF(nn.Module):
     def __init__(self,pts_ch=3,view_ch=3,D=8,W=256,skips=[4]):
