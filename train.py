@@ -56,10 +56,7 @@ def train(args:NeRFTrainingArgs):
     pbar=tqdm(range(start,args.N_iters+1),desc='\033[0;37;41mProcessing\033[0m',colour='red',\
                 postfix=dict)
     for i in pbar:
-        #todo:
         batch_rays,target_s=sample_traindata(args,train_targetImg_ten,scene_train,i) 
-        if i==50:
-            a=52
         rgb, disp, acc,rgb0, rets_dict=render(batch_rays,chunk=args.chunk,**render_kwargs_train)
         loss=mse(rgb,target_s)
         psnr=mse2psnr(loss)

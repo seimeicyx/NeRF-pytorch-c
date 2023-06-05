@@ -22,5 +22,5 @@ def test(args:NeRFTestingArgs):
     # _,optimizer,model,model_fine=load_ckpt(args.ctpk,optimizer,render_kwargs_test['network_fn'],render_kwargs_test['network_fine'])
     # render_kwargs_test['network_fn'],render_kwargs_test['network_fine']=model,model_fine
     with torch.no_grad():
-        rgbs,disps=test_render(test_targetImg_ten,scene_test,chunk=args.chunk,test_num=args.valid_num,**render_kwargs_test)
-        save_imgs(rgbs,args.exp_dir,"test{}".format(start))
+        rgbs,disps=test_render(test_targetImg_ten,scene_test,chunk=args.chunk,test_num=args.test_num,**render_kwargs_test)
+        save_imgs(rgbs,args.exp_dir,start)

@@ -61,4 +61,4 @@ def save_imgs(imgs:List,save_path:Path,iters:str):
         img=imgf2u(img)
         img=Image.fromarray(img)
         img.save(str(save_path.joinpath(iters))+".png")
-    logger.debug("saved images to :{}".format(save_path))
+        logger.debug("saved images to :{}".format(save_path))

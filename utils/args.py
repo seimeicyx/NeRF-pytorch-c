@@ -2,7 +2,7 @@ from dataclasses import dataclass,field
 from pathlib import Path
 from typing import List
 @dataclass(frozen=True)
-class NeRFArgs:
+class NeRFArgs():
     #L for points
     multires:int=10
     #L for views
@@ -69,6 +69,14 @@ class NeRFTrainingArgs():
     i_loss:int=100
     #valid img nums
     valid_num:int=1
+    #train iters
+    N_iters:int=40_0000
+    #number of steps to train on central crops
+    precrop_iters:int=500
+    #fraction of img taken for central crops
+    precrop_frac:float=0.5
+    #exponential learning rate decay (in 1000 steps)
+    lrate_decay:int=500
     
     #L for points
     multires:int=10
@@ -107,14 +115,7 @@ class NeRFTrainingArgs():
     #sample boundary
     near:float=2.
     far:float=6.
-    #train iters
-    N_iters:int=40_0000
-    #number of steps to train on central crops
-    precrop_iters:int=500
-    #fraction of img taken for central crops
-    precrop_frac:float=0.5
-    #exponential learning rate decay (in 1000 steps)
-    lrate_decay:int=500
+    
     
 @dataclass(frozen=True)
 class NeRFTestingArgs():
@@ -125,7 +126,7 @@ class NeRFTestingArgs():
     #save path
     exp_dir:Path
     #test img nums
-    valid_num:int=1
+    test_num:int=5
     
     #L for points
     multires:int=10
@@ -164,11 +165,3 @@ class NeRFTestingArgs():
     #sample boundary
     near:float=2.
     far:float=6.
-    #train iters
-    N_iters:int=40_0000
-    #number of steps to train on central crops
-    precrop_iters:int=500
-    #fraction of img taken for central crops
-    precrop_frac:float=0.5
-    #exponential learning rate decay (in 1000 steps)
-    lrate_decay:int=500

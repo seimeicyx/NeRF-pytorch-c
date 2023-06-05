@@ -4,7 +4,7 @@ from typing_extensions import Annotated
 from utils.args import NeRFTrainingArgs,NeRFTestingArgs
 from pathlib import Path
 import os 
-os.environ['CUDA_VISIBLE_DEVICES'] = "0" 
+os.environ['CUDA_VISIBLE_DEVICES'] = "1" 
 import torch
 
 CmdTrain=Annotated[
