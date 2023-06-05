@@ -52,9 +52,8 @@ def train(args:NeRFTrainingArgs):
     render_kwargs_train.update(bds_dic)
     render_kwargs_test.update(bds_dic)
     
-    
     start+=1
-    pbar=tqdm(range(start,args.N_iters+1),desc='\033[0;37;41mProcessing\033[0m',colour='pink',\
+    pbar=tqdm(range(start,args.N_iters+1),desc='\033[0;37;41mProcessing\033[0m',colour='red',\
                 postfix=dict)
     for i in pbar:
         #todo:
@@ -80,7 +79,7 @@ def train(args:NeRFTrainingArgs):
         if i%args.i_valid==0:
             with torch.no_grad():
                 rgbs,disps=test_render(valid_targetImg_ten,scene_train,chunk=args.chunk,test_num=args.valid_num,**render_kwargs_test)
-                save_imgs(rgbs,args.exp_dir,i)
+                save_imgs(rgbs,args.exp_dir,str(i))
         if i%args.i_ckpt==0:
             save_ckpt(args.exp_dir,i,optimizer,**render_kwargs_train)
             

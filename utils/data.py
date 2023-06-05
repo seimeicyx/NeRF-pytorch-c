@@ -52,13 +52,13 @@ def load_jsondata(json_path:Path)->Tuple[Target_img_tensor,SceneMeta]:
                                           torch.Tensor(train_targetImg.camera_poses).to(_device)[:,:3,:4])
         return train_targetImg_ten,scene_train
 imgf2u=lambda img:(np.clip(img,0,1)*255).astype(np.uint8)
-def save_imgs(imgs:List,save_path:Path,iters:int):
+def save_imgs(imgs:List,save_path:Path,iters:str):
     if not save_path.exists():
         save_path.mkdir(exist_ok=True)
-    save_path=save_path.joinpath(str(iters))
+    save_path=save_path.joinpath(iters)
     save_path.mkdir(exist_ok=True)
     for img in imgs:
         img=imgf2u(img)
         img=Image.fromarray(img)
-        img.save(str(save_path.joinpath(str(iters)))+".png")
+        img.save(str(save_path.joinpath(iters))+".png")
     logger.debug("saved images to :{}".format(save_path))

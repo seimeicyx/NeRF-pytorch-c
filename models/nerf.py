@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from utils.args import NeRFTrainingArgs
 from copy import deepcopy
 from typing import Any
+from utils.ckpt import load_ckpt
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 mse=lambda x,y:torch.mean((x-y)**2)
 class NeRF(nn.Module):
@@ -87,6 +88,8 @@ def create_nerf(args:NeRFTrainingArgs):
                                             model=network_fn,
                                             batch_chunk=batch_chunk)
     start=0
+    if args.ckpt:
+        start,optimizer,corse_model,fine_model=load_ckpt(args.ckpt,optimizer,corse_model,fine_model)
     render_kwargs_train = {
         'network_query_fn' : network_query_fn,
         'perturb' : args.perturb,

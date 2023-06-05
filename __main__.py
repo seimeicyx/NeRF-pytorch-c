@@ -4,7 +4,7 @@ from typing_extensions import Annotated
 from utils.args import NeRFTrainingArgs,NeRFTestingArgs
 from pathlib import Path
 import os 
-os.environ['CUDA_VISIBLE_DEVICES'] = "1" 
+os.environ['CUDA_VISIBLE_DEVICES'] = "0" 
 import torch
 
 CmdTrain=Annotated[
@@ -15,7 +15,11 @@ CmdTrain=Annotated[
                                                       exp_dir=Path("/home/cad_83/E/chenyingxi/my-nerf/data/train2")))]
 CmdTest=Annotated[
         NeRFTestingArgs,
-        tyro.conf.subcommand(name="test")]
+        tyro.conf.subcommand(name="test",
+                             default=NeRFTestingArgs(test_data_filepath=Path("/home/cad_83/E/chenyingxi/my-nerf/data/nerf_synthetic/lego/transforms_train.json"),
+                                                      ckpt=Path("/home/cad_83/E/chenyingxi/my-nerf/data/train2/1000.tar"),
+                                                      exp_dir=Path("/home/cad_83/E/chenyingxi/my-nerf/data/test1")
+                                                      ))]
 CmdArgs=Union[CmdTrain,CmdTest]
 
 if __name__=="__main__":
@@ -25,4 +29,5 @@ if __name__=="__main__":
         from train import train
         train(args)
     elif isinstance(args,NeRFTestingArgs):
-        pass
+        from test import test
+        test(args)

@@ -103,17 +103,25 @@ def render_batch_rays(ray_batch:torch.Tensor,
     #         print(f"! [Numerical Error] {k} contains nan or inf.")
     return ret
 
-def batchify_rays(rays_flat:torch.Tensor, chunk:int=1024*32, **kwargs):
+def batchify_rays(rays_flat:torch.Tensor, chunk:int=1024*32,istesing:bool=False, **kwargs):
     all_ret={}
-    for i in range(0,rays_flat.shape[0],chunk):
-        ret=render_batch_rays(rays_flat[i:i+chunk],**kwargs)
-        for k in ret:
-            if k not in all_ret:
-                all_ret[k]=[]
-            all_ret[k].append(ret[k])
+    if istesing:
+        for i in tqdm(range(0,rays_flat.shape[0],chunk),colour='red',desc="\033[0;31mRendering(per img)\033[0m"):
+            ret=render_batch_rays(rays_flat[i:i+chunk],**kwargs)
+            for k in ret:
+                if k not in all_ret:
+                    all_ret[k]=[]
+                all_ret[k].append(ret[k])
+    else:
+        for i in range(0,rays_flat.shape[0],chunk):
+            ret=render_batch_rays(rays_flat[i:i+chunk],**kwargs)
+            for k in ret:
+                if k not in all_ret:
+                    all_ret[k]=[]
+                all_ret[k].append(ret[k])
     all_ret={k:torch.cat(all_ret[k],0)for k in all_ret}
     return all_ret
-def render(rays:torch.Tensor,near=1.,far=6.,chunk:int=1024*32,**kwargs):
+def render(rays:torch.Tensor,istesing:bool=False,near=1.,far=6.,chunk:int=1024*32,**kwargs):
     #ray_batch[rays_o, rays_d, near, far, viewdirs]=[1024,3 3 1 1 3]
     rays_o, rays_d=rays
     sh=rays_o.shape[:-1]
@@ -128,7 +136,7 @@ def render(rays:torch.Tensor,near=1.,far=6.,chunk:int=1024*32,**kwargs):
     far=torch.reshape(far,[-1,far.shape[-1]])
     rays_flat=torch.cat([rays_o, rays_d, near, far, viewdirs],-1)
     #render
-    all_ret_flat=batchify_rays(rays_flat,chunk,**kwargs)
+    all_ret_flat=batchify_rays(rays_flat,chunk,istesing,**kwargs)
     #reshape
     all_ret={k:torch.reshape(all_ret_flat[k],list(sh)+[-1]) for k in all_ret_flat.keys()}
     k_extract = ['rgb_map', 'disp_map', 'acc_map','rgb0']
@@ -136,19 +144,20 @@ def render(rays:torch.Tensor,near=1.,far=6.,chunk:int=1024*32,**kwargs):
     return extract_list+[all_ret]
 
 def test_render(targetImg_ten: Target_img_tensor,scene_data: SceneMeta,test_num:int=1,chunk:int=32*32*4,**render_kwargs):
-    test_num=max(min(test_num,imgs.shape[0]),0)
+    test_num=max(min(test_num,targetImg_ten.imgs.shape[0]),0)
     imgs=targetImg_ten.imgs[:test_num]
     poses=targetImg_ten.camera_poses[:test_num]
     
     rgbs=[]
     disps=[]
-    for i,tg in tqdm(enumerate(imgs),desc='Processing'):
+    for i in tqdm(range(imgs.shape[0]),desc='\033[0;37;41mTesting\033[0m',colour='blue'):
+        tg=imgs[i]
         pose=poses[i]
         cam=PinholeCamera(scene_meta=scene_data,camera_pose=pose)
         rays_o, rays_d = cam.cast_ray()
         rays=torch.stack([rays_o, rays_d],0)
-        rgb, disp,_,_,_=render(rays,chunk=chunk,**render_kwargs)
+        rgb, disp,_,_,_=render(rays,istesing=True,chunk=chunk,**render_kwargs)
         rgbs.append(rgb.cpu().numpy())
         disps.append(disp.cpu().numpy())
-        logger.debug("test loss for img:{} is {}".format(i,mse(rgb,tg)))
+        tqdm.write("\033[0;31mtest loss for img:{} is {}\033[0m".format(i,mse(rgb,tg)))
     return rgbs,disps
