@@ -1,6 +1,11 @@
 import torch
 import torch.nn.functional as F
 from typing import Any
+from utils.data import load_jsondata,Target_img_tensor
+from utils.camera import SceneMeta,PinholeCamera
+from loguru import logger
+from models.nerf import mse
+from tqdm import tqdm, trange
 def raw2outputs(raw:torch.Tensor,z_vals:torch.Tensor,rays_d:torch.Tensor):
     rgb=raw[...,:3]
     delta=raw[...,-1]
@@ -128,4 +133,22 @@ def render(rays:torch.Tensor,near=1.,far=6.,chunk:int=1024*32,**kwargs):
     all_ret={k:torch.reshape(all_ret_flat[k],list(sh)+[-1]) for k in all_ret_flat.keys()}
     k_extract = ['rgb_map', 'disp_map', 'acc_map','rgb0']
     extract_list=[all_ret[k] for k in k_extract]
-    return extract_list+[all_ret]  
+    return extract_list+[all_ret]
+
+def test_render(targetImg_ten: Target_img_tensor,scene_data: SceneMeta,test_num:int=1,chunk:int=32*32*4,**render_kwargs):
+    test_num=max(min(test_num,imgs.shape[0]),0)
+    imgs=targetImg_ten.imgs[:test_num]
+    poses=targetImg_ten.camera_poses[:test_num]
+    
+    rgbs=[]
+    disps=[]
+    for i,tg in tqdm(enumerate(imgs),desc='Processing'):
+        pose=poses[i]
+        cam=PinholeCamera(scene_meta=scene_data,camera_pose=pose)
+        rays_o, rays_d = cam.cast_ray()
+        rays=torch.stack([rays_o, rays_d],0)
+        rgb, disp,_,_,_=render(rays,chunk=chunk,**render_kwargs)
+        rgbs.append(rgb.cpu().numpy())
+        disps.append(disp.cpu().numpy())
+        logger.debug("test loss for img:{} is {}".format(i,mse(rgb,tg)))
+    return rgbs,disps

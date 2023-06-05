@@ -6,7 +6,7 @@ import torch
 class SceneMeta():
     H:int
     W:int
-    K:List
+    K:np.array
     def get_scene(self):
         return self.H,self.W,self.K
 @dataclass
@@ -22,7 +22,7 @@ class PinholeCamera():
         return fx,fy,x0,y0
     def cast_ray(self):
         H,W,K=self.scene_meta.get_scene()
-        c2w=torch.tensor(self.camera_pose)
+        c2w=torch.as_tensor(self.camera_pose,dtype=torch.float32)
         u,v=torch.meshgrid(torch.arange(W),torch.arange(H))
         u=u.t()
         v=v.t()
