@@ -53,6 +53,7 @@ def load_jsondata(json_path:Path)->Tuple[Target_img_tensor,SceneMeta]:
         return train_targetImg_ten,scene_train
 imgf2u=lambda img:(np.clip(img,0,1)*255).astype(np.uint8)
 def save_imgs(imgs:List,save_path:Path,iters:str):
+    iters=str(iters)
     if not save_path.exists():
         save_path.mkdir(exist_ok=True)
     save_path=save_path.joinpath(iters)

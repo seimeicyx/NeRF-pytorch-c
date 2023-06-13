@@ -126,7 +126,7 @@ class NeRFTestingArgs():
     #save path
     exp_dir:Path
     #test img nums
-    test_num:int=5
+    test_num:int=1
     
     #L for points
     multires:int=10
